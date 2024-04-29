@@ -81,6 +81,17 @@ func messageHandler(s *discordgo.Session, e *discordgo.MessageCreate) {
 		//arguments := args[1:]
 
 		switch cmd {
+		case "help":
+			help := `
+bert: bert
+ciar: ciar
+con: con
+rtd:
+	rolls the dice to show a fun quote from the last 100 quotes!
+loves: 50/50
+`
+			_, err := s.ChannelMessageSend(e.ChannelID, help)
+			ErrorHandler("Failed sending help Command Response: ", err)
 		case "bert":
 			_, err := s.ChannelMessageSend(e.ChannelID, "Bertin my peanits, straight up zorkin it!")
 			ErrorHandler("Failed sending bert Command Response: ", err)
