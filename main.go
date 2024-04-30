@@ -105,13 +105,18 @@ loves: 50/50
 			ErrorHandler("Failed sending con Command Response: ", err)
 
 		case "rtd":
-			messages, err := s.ChannelMessages(config.QuotesChannelId, 100, "", "", "")
-			ErrorHandler("Failed getting quotes: ", err)
+			if e.GuildID != config.ServerId {
+				_, err := s.ChannelMessageSend(e.ChannelID, "Wrong place bucko!")
+				ErrorHandler("Failed sending quote wrong location: ", err)
+			} else {
+				messages, err := s.ChannelMessages(config.QuotesChannelId, 100, "", "", "")
+				ErrorHandler("Failed getting quotes: ", err)
 
-			rnd := rand.Intn(100)
+				rnd := rand.Intn(100)
 
-			_, err = s.ChannelMessageSend(e.ChannelID, messages[rnd].Content)
-			ErrorHandler("Failed sending quotes: ", err)
+				_, err = s.ChannelMessageSend(e.ChannelID, messages[rnd].Content)
+				ErrorHandler("Failed sending quotes: ", err)
+			}
 		case "loves":
 			var msg string
 			rnd := rand.Intn(100)
