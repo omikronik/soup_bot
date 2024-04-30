@@ -36,6 +36,7 @@ func ReadConfig() (*Config, error) {
 
 var BotId string
 var config Config
+var Nouns []string
 
 func main() {
 	configPtr, err := ReadConfig()
@@ -44,6 +45,13 @@ func main() {
 		return
 	}
 	config = *configPtr
+
+	nounFile, err := os.ReadFile("nouns.txt")
+	if err != nil {
+		fmt.Println("Failed to read nouns :(", err)
+		return
+	}
+	Nouns = strings.Split(string(nounFile), "\n")
 
 	soup, err := discordgo.New("Bot " + config.Token)
 	if err != nil {
@@ -89,6 +97,7 @@ con: con
 rtd:
 	rolls the dice to show a fun quote from the last 100 quotes!
 loves: 50/50
+wish: generate a lovely wish :)
 `
 			_, err := s.ChannelMessageSend(e.ChannelID, help)
 			ErrorHandler("Failed sending help Command Response: ", err)
@@ -127,11 +136,15 @@ loves: 50/50
 			}
 			_, err := s.ChannelMessageSend(e.ChannelID, msg)
 			ErrorHandler("Failed sending quotes: ", err)
+		case "wish":
+			rnd := rand.Intn(len(Nouns))
+			msg := fmt.Sprintf("I wish I was a %s", Nouns[rnd])
+			_, err := s.ChannelMessageSend(e.ChannelID, msg)
+			ErrorHandler("Failed sending wish: ", err)
 		default:
 			_, err := s.ChannelMessageSend(e.ChannelID, fmt.Sprintf("Unknown command %q.", cmd))
 			ErrorHandler("Failed sending Unknown Command Response: ", err)
 		}
-
 	}
 }
 
