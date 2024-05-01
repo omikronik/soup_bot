@@ -72,8 +72,10 @@ func Start() (int, error) {
 	err = soup.Open()
 	if err != nil {
 		fmt.Println("Failed connecting to Discord: ", err)
+		return 1, err
 	}
 
+	fmt.Println("Running soup...")
 	return 0, nil
 }
 
