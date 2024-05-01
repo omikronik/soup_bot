@@ -7,16 +7,19 @@ ifeq ($(ARCH), x86_64)
 	TARGET_ARCH := amd64
 	CGO_FLAG := 1
 else ifeq ($(ARCH), aarch64)
+	TARGET_ARCH := arm64
+	CGO_FLAG := 0
+else ifeq ($(ARCH), armv7l)
 	TARGET_ARCH := arm
 	CGO_FLAG := 0
 else
-	TARGET_ARCH := arm
+	TARGET_ARCH := amd64
 	CGO_FLAG := 1
 endif
 
 OUTDIR := bin
 BIN_NAME := soup_bot
-PID_FILE := $(OUTPUT_DIR)/$(APP_NAME).pid
+PID_FILE := $(OUTDIR)/$(BIN_NAME).pid
 
 .PHONY: build
 build:
@@ -31,7 +34,7 @@ run: build
 
 .PHONY: stop
 stop:
-	@if [ -f $(PID_FILE)]; then \
+	@if [ -f $(PID_FILE) ]; then \
 		kill $$(cat $(PID_FILE)); \
 		rm $(PID_FILE); \
 		echo "Application stopped."; \
