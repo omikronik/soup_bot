@@ -13,6 +13,7 @@ import (
 var BotId string
 var config Config
 var Nouns []string
+var Verbs []string
 
 type Config struct {
 	Token           string `json:"token"`
@@ -38,6 +39,16 @@ func ReadConfig() (*Config, error) {
 	return &cfg, nil
 }
 
+func ReadWordFile(path string) ([]string, error) {
+	nounFile, err := os.ReadFile(path)
+	if err != nil {
+		fmt.Println("Failed to read nouns :(", err)
+		return nil, err
+	}
+
+	return strings.Split(string(nounFile), "\n"), nil
+}
+
 func Start() (int, error) {
 	configPtr, err := ReadConfig()
 	if err != nil {
@@ -46,12 +57,17 @@ func Start() (int, error) {
 	}
 	config = *configPtr
 
-	nounFile, err := os.ReadFile("nouns.txt")
+	Nouns, err = ReadWordFile("nouns.txt")
 	if err != nil {
 		fmt.Println("Failed to read nouns :(", err)
 		return 1, err
 	}
-	Nouns = strings.Split(string(nounFile), "\n")
+
+	Verbs, err = ReadWordFile("verbs.txt")
+	if err != nil {
+		fmt.Println("Failed to read nouns :(", err)
+		return 1, err
+	}
 
 	soup, err := discordgo.New("Bot " + config.Token)
 	if err != nil {
@@ -141,6 +157,11 @@ wish: generate a lovely wish :)
 		case "wish":
 			rnd := rand.Intn(len(Nouns))
 			msg := fmt.Sprintf("I wish I was a %s", Nouns[rnd])
+			_, err := s.ChannelMessageSend(e.ChannelID, msg)
+			ErrorHandler("Failed sending wish: ", err)
+		case "second":
+			rnd := rand.Intn(len(Verbs))
+			msg := fmt.Sprintf("I'll _%s_ you in a second", Verbs[rnd])
 			_, err := s.ChannelMessageSend(e.ChannelID, msg)
 			ErrorHandler("Failed sending wish: ", err)
 		default:
