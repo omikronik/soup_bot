@@ -5,42 +5,39 @@ ARCH := $(shell uname -m)
 
 ifeq ($(ARCH), x86_64)
 	TARGET_ARCH := amd64
+	GOOS := linux
 	CGO_FLAG := 1
 else ifeq ($(ARCH), aarch64)
 	TARGET_ARCH := arm64
+	GOOS := linux
+	CGO_FLAG := 0
+else ifeq ($(ARCH), arm64)
+	TARGET_ARCH := arm64
+	GOOS := darwin
 	CGO_FLAG := 0
 else ifeq ($(ARCH), armv7l)
 	TARGET_ARCH := arm
+	GOOS := linux
 	CGO_FLAG := 0
 else
 	TARGET_ARCH := amd64
-	CGO_FLAG := 1
+	GOOS := linux
+	CGO_FLAG := 0
 endif
 
 OUTDIR := bin
 BIN_NAME := soup_bot
-PID_FILE := $(OUTDIR)/$(BIN_NAME).pid
 
 .PHONY: build
 build:
 	@echo "Building for architecture: $(TARGET_ARCH)..."
 	@mkdir -p $(OUTDIR)
-	GOARCH=$(TARGET_ARCH) GOOS=linux CGO_ENABLED=$(CGO_FLAG) go build -o $(OUTDIR)/$(BIN_NAME) .
+	GOARCH=$(TARGET_ARCH) GOOS=$(GOOS) CGO_ENABLED=$(CGO_FLAG) go build -o $(OUTDIR)/$(BIN_NAME) .
 
 .PHONY: run
 run: build
 	@echo "Running soup"
-	./$(OUTDIR)/$(BIN_NAME) & echo $$! > $(PID_FILE)
-
-.PHONY: stop
-stop:
-	@if [ -f $(PID_FILE) ]; then \
-		kill $$(cat $(PID_FILE)); \
-		rm $(PID_FILE); \
-		echo "Application stopped."; \
-	else \
-		echo "No PID file found. Process might not be running."; \
-	fi
+	./$(OUTDIR)/$(BIN_NAME)
 
 .PHONY: clean
 clean:
