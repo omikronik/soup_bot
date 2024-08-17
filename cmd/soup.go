@@ -112,10 +112,13 @@ func messageHandler(s *discordgo.Session, e *discordgo.MessageCreate) {
 bert: bert
 ciar: ciar
 con: con
-rtd:
+quot:
 	rolls the dice to show a fun quote from the last 100 quotes!
+rtd:
+	actually rolls the dice, format <diceCount>d<diceSize>, e.g. 2d20
 loves: 50/50
 wish: generate a lovely wish :)
+second: I'll noun you in a second
 `
 			_, err := s.ChannelMessageSend(e.ChannelID, help)
 			ErrorHandler("Failed sending help Command Response: ", err)
@@ -131,7 +134,7 @@ wish: generate a lovely wish :)
 			_, err := s.ChannelMessageSend(e.ChannelID, "Just be a lone wolf rather than alone wolf")
 			ErrorHandler("Failed sending con Command Response: ", err)
 
-		case "rtd":
+		case "quot":
 			if e.GuildID != config.ServerId {
 				_, err := s.ChannelMessageSend(e.ChannelID, "Wrong place bucko!")
 				ErrorHandler("Failed sending quote wrong location: ", err)
@@ -164,6 +167,16 @@ wish: generate a lovely wish :)
 			msg := fmt.Sprintf("I'll _%s_ you in a second", Verbs[rnd])
 			_, err := s.ChannelMessageSend(e.ChannelID, msg)
 			ErrorHandler("Failed sending wish: ", err)
+		case "rtd":
+			rolls, err := rtd(args[1])
+			ErrorHandler("Failed rolling dice: ", err)
+			if err != nil {
+				_, err := s.ChannelMessageSend(e.ChannelID, fmt.Sprintf("Err rolling dice: %v.", err))
+				ErrorHandler("Failed sending dice roll response: ", err)
+			} else {
+				_, err := s.ChannelMessageSend(e.ChannelID, *rolls)
+				ErrorHandler("Failed sending dice roll response: ", err)
+			}
 		default:
 			_, err := s.ChannelMessageSend(e.ChannelID, fmt.Sprintf("Unknown command %q.", cmd))
 			ErrorHandler("Failed sending Unknown Command Response: ", err)
