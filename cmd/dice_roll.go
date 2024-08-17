@@ -72,7 +72,7 @@ func (d *DiceRoll) RollDice() {
 	for i, v := range d.DiceRolls {
 		total += v
 		if i == (len(d.DiceRolls) - 1) {
-			builder.WriteString(fmt.Sprintf("%d = %d", v, total))
+			builder.WriteString(fmt.Sprintf("%d = %d\n", v, total))
 		} else {
 			builder.WriteString(fmt.Sprintf("%d + ", v))
 		}
