@@ -113,6 +113,9 @@ func rtd(dice string) (*string, error) {
 		if err != nil {
 			return nil, errors.New(fmt.Sprintf("Invalid input, bad int conversion: %s", matches[i]))
 		}
+		if intConv > 1000 {
+			return nil, errors.New(fmt.Sprintf("Invalid input, go smaller than %s", matches[i]))
+		}
 		diceSettings = append(diceSettings, intConv)
 	}
 

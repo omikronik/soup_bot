@@ -40,13 +40,13 @@ func ReadConfig() (*Config, error) {
 }
 
 func ReadWordFile(path string) ([]string, error) {
-	nounFile, err := os.ReadFile(path)
+	inputFile, err := os.ReadFile(path)
 	if err != nil {
-		fmt.Println("Failed to read nouns :(", err)
+		fmt.Println("Failed to read input file :(", err)
 		return nil, err
 	}
 
-	return strings.Split(string(nounFile), "\n"), nil
+	return strings.Split(string(inputFile), "\n"), nil
 }
 
 func Start() (int, error) {
@@ -168,13 +168,23 @@ second: I'll noun you in a second
 			_, err := s.ChannelMessageSend(e.ChannelID, msg)
 			ErrorHandler("Failed sending wish: ", err)
 		case "rtd":
-			rolls, err := rtd(args[1])
-			ErrorHandler("Failed rolling dice: ", err)
-			if err != nil {
-				_, err := s.ChannelMessageSend(e.ChannelID, fmt.Sprintf("Err rolling dice: %v.", err))
-				ErrorHandler("Failed sending dice roll response: ", err)
+			if len(args) > 1 {
+				rolls, err := rtd(args[1])
+				ErrorHandler("Failed rolling dice: ", err)
+				if err != nil {
+					_, err := s.ChannelMessageSend(e.ChannelID, fmt.Sprintf("Err rolling dice: %v.", err))
+					ErrorHandler("Failed sending dice roll response: ", err)
+				} else {
+					if len(*rolls) < 4000 {
+						_, err := s.ChannelMessageSend(e.ChannelID, *rolls)
+						ErrorHandler("Failed sending dice roll response: ", err)
+					} else {
+						_, err := s.ChannelMessageSend(e.ChannelID, fmt.Sprintf("too big, discord output limit hit :("))
+						ErrorHandler("Failed sending dice roll response: ", err)
+					}
+				}
 			} else {
-				_, err := s.ChannelMessageSend(e.ChannelID, *rolls)
+				_, err := s.ChannelMessageSend(e.ChannelID, fmt.Sprintf("Failed to parse rolls"))
 				ErrorHandler("Failed sending dice roll response: ", err)
 			}
 		default:
