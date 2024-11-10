@@ -1,9 +1,21 @@
 package cmd
 
-import "testing"
+import (
+	"math/rand"
+	"testing"
+
+	"github.com/bwmarrin/discordgo"
+)
 
 var VerbsTest = []string{"test"}
 var NountsTest = []string{"test"}
+
+var configMock = Config{
+	Token:           "Hello",
+	BotPrefix:       "!",
+	ServerId:        "1234567890",
+	QuotesChannelId: "1234567890",
+}
 
 // Check if commands are registered
 func TestCommands(t *testing.T) {
@@ -102,8 +114,53 @@ func TestLoves(t *testing.T) {
 }
 
 func TestQuot(t *testing.T) {
+	rand.NewSource(1)
+
+	e := &discordgo.MessageCreate{
+		Message: &discordgo.Message{
+			GuildID: config.ServerId,
+		},
+	}
+
+	msg, err := QuoteHandler(s, e, nil)
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+
+	if msg == "" {
+		t.Fatalf("Expected a message, got empty string")
+	}
+
+	messages, _ := s.ChannelMessages("", 0, "", "", "")
+	found := false
+	for _, message := range messages {
+		if msg == message.Content {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Errorf("Result %q not found in messages", msg)
+	}
+
+	e.Message.GuildID = "wrong-guild-id"
+	msg, err = QuoteHandler(s, e, nil)
+	if err == nil || err.Error() != "Wrong place bucko" {
+		t.Fatalf("expected error 'Wrong place bucko', got %v", err)
+	}
 }
+
 func TestRtd(t *testing.T) {
+	rtdValue := "2d6"
+
+	msg, err := RtdHandler([]string{rtdValue})
+	if err != nil {
+		t.Errorf("RtdHandler returned error: %v", err)
+	}
+
+	if msg == "" {
+		t.Error("RtdHandler returned invalid msg")
+	}
 }
 func TestWish(t *testing.T) {
 	Nouns = NountsTest
@@ -112,7 +169,7 @@ func TestWish(t *testing.T) {
 		t.Errorf("WishHandler returned error: %v", err)
 	}
 
-	if msg != "test" {
+	if msg != "I wish I was a test" {
 		t.Errorf("WishHandler returnd invalid msg: %s", msg)
 	}
 

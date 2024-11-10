@@ -8,6 +8,10 @@ import (
 	"github.com/pkg/errors"
 )
 
+type DiscordSession interface {
+	ChannelMessages(channelID string, limit int, beforeID, afterID, aroundID string) ([]*discordgo.Message, error)
+}
+
 type Command struct {
 	Name           string
 	MinArgs        int
@@ -139,7 +143,7 @@ func SecondHandler(args []string) (string, error) {
 // Will return a string that is the dice roll added up and
 // the sum, e.g. 5 + 2 + 3 = 10 with some extra fluff
 func RtdHandler(args []string) (string, error) {
-	rolls, err := rtd(args[0])
+	rolls, err := Rtd(args[0])
 	if err != nil {
 		return "", err
 	}

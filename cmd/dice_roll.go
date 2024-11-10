@@ -98,7 +98,7 @@ func (d *DiceRoll) RollDice() {
 	d.DiceOutput = builder.String()
 }
 
-func rtd(dice string) (*string, error) {
+func Rtd(dice string) (*string, error) {
 	reg := regexp.MustCompile(`^([1-9]\d*)d([1-9]\d*)$`)
 
 	matches := reg.FindStringSubmatch(dice)

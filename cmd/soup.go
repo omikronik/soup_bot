@@ -3,7 +3,6 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"math/rand"
 	"os"
 	"strings"
 
@@ -104,7 +103,30 @@ func messageHandler(s *discordgo.Session, e *discordgo.MessageCreate) {
 	if strings.HasPrefix(e.Content, prefix) {
 		args := strings.Fields(e.Content)[strings.Index(e.Content, prefix):]
 		cmd := args[0][len(prefix):]
-		//arguments := args[1:]
+		var arguments []string
+		if len(args) > 1 {
+			arguments = args[1:]
+		} else {
+			arguments = nil
+		}
+
+		command, exists := Commands[cmd]
+		if !exists {
+			Commands["default"].SimpleHandler(nil)
+		}
+
+		if command.IsComplex {
+			command.ComplexHandler(s, e, arguments)
+		}
+
+		if !command.IsComplex {
+			command.SimpleHandler(arguments)
+		}
+
+	}
+}
+
+/*
 
 		switch cmd {
 		case "help":
@@ -169,7 +191,7 @@ second: I'll noun you in a second
 			ErrorHandler("Failed sending wish: ", err)
 		case "rtd":
 			if len(args) > 1 {
-				rolls, err := rtd(args[1])
+				rolls, err := Rtd(args[1])
 				ErrorHandler("Failed rolling dice: ", err)
 				if err != nil {
 					_, err := s.ChannelMessageSend(e.ChannelID, fmt.Sprintf("Err rolling dice: %v.", err))
@@ -192,7 +214,7 @@ second: I'll noun you in a second
 			ErrorHandler("Failed sending Unknown Command Response: ", err)
 		}
 	}
-}
+*/
 
 func ErrorHandler(errMsg string, err error) {
 	if err != nil {
